@@ -6,7 +6,13 @@
   "framework": null,
   "rewrites": [
     { "source": "/api/:path*", "destination": "/api/:path*" },
+    {
+      "source": "/callback",
+      "has": [{ "type": "query", "key": "code" }],
+      "destination": "/index.html"
+    },
     { "source": "/callback", "destination": "/index.html" },
+    { "source": "/callback/", "destination": "/index.html" },
     { "source": "/playlist-creator", "destination": "/index.html" },
     { "source": "/:path*", "destination": "/index.html" }
   ]
