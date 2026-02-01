@@ -1,0 +1,234 @@
+html {
+  scroll-behavior: smooth;
+}
+
+.App {
+  height: 100vh;
+}
+
+*,
+*::after,
+*::before {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-repeat: no-repeat;
+  background-position-x: right;
+  font-family:
+    "Degular",
+    system-ui,
+    -apple-system,
+    sans-serif;
+  overflow: hidden;
+}
+
+.display-none {
+  display: none !important;
+}
+
+.homeContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.navbar {
+  color: black;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  position: relative;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  padding: 4vh 3vw;
+}
+
+a {
+  text-decoration: none;
+  color: black;
+}
+
+a.spotifyConnexion {
+  text-align: left;
+  font-size: 1.8em;
+  color: white;
+  margin-left: 20%;
+  display: flex;
+  align-items: center;
+  border: black solid 1px;
+  width: 70%;
+  height: 40vh;
+  max-height: 25vw;
+  margin-top: 8%;
+  float: right;
+  border-top-left-radius: 222px 222px;
+  border-bottom-left-radius: 222px 222px;
+}
+
+.basicOrange {
+  background-color: #fd7e40;
+}
+.basicVert {
+  background-color: #3db372;
+}
+.basicBleu {
+  background-color: #4a7df2;
+}
+.basicRose {
+  background-color: #f31eeb;
+}
+.basicJaune {
+  background-color: #f9b125;
+}
+
+a.spotifyConnexion span {
+  font-weight: 600;
+  margin-left: 1%;
+}
+a.spotifyConnexion svg {
+  margin-right: 1%;
+  margin-left: 20%;
+}
+a.spotifyConnexion svg path {
+  stroke: white;
+}
+
+a.spotifyConnexion.orange:hover {
+  background-color: #fd7e40;
+}
+a.spotifyConnexion.vert:hover {
+  background-color: #3db372;
+}
+a.spotifyConnexion.bleu:hover {
+  background-color: #4a7df2;
+}
+a.spotifyConnexion.rose:hover {
+  background-color: #f31eeb;
+}
+a.spotifyConnexion.jaune:hover {
+  background-color: #f9b125;
+}
+
+a.left {
+  position: relative;
+  font-family: degular, sans-serif;
+  font-weight: 600;
+  font-size: 2.5rem;
+  margin-right: 10px;
+}
+
+a.left:before {
+  content: "";
+  position: absolute;
+  width: 0;
+  height: 0.8px;
+  bottom: 0;
+  left: 0;
+  visibility: hidden;
+  transition: all 0.3s ease-in-out;
+}
+
+a.left.orange:before {
+  background-color: #fd7e40;
+}
+a.left.vert:before {
+  background-color: #3db372;
+}
+a.left.bleu:before {
+  background-color: #4a7df2;
+}
+a.left.rose:before {
+  background-color: #f31eeb;
+}
+a.left.jaune:before {
+  background-color: #f9b125;
+}
+a.left:hover:before {
+  visibility: visible;
+  width: 100%;
+}
+
+.nav-links {
+  display: none;
+  width: 100%;
+  text-align: center;
+  margin-inline: 74px;
+}
+
+.nav-links.active {
+  display: block;
+}
+
+.title {
+  position: relative;
+  margin-top: 5vh;
+  margin-left: 3vw;
+}
+
+h1 {
+  font-family: Degular, system-ui, sans-serif;
+  font-size: 12vh;
+  font-weight: 600;
+  line-height: 90px;
+  letter-spacing: -2px;
+  text-align: left;
+}
+
+h1:first-of-type {
+  margin-left: 7%;
+}
+
+h1.playlistTitle:first-of-type {
+  font-size: 10vh;
+  margin-left: 7vw;
+  margin-top: 8vh;
+}
+
+button {
+  all: unset;
+  border: solid #4a7df2 1px;
+  background-color: white;
+  padding: 10px 25px;
+  border-radius: 50px;
+  /* margin-left: 20px; */
+  cursor: pointer;
+}
+
+.blocConnect {
+  height: 88vh;
+  width: 95vw;
+  border: solid black 1px;
+  border-right: 0;
+  border-bottom: 0;
+  border-top-left-radius: 250px 250px;
+  margin-top: 0.4vh;
+  margin-left: 5vw;
+}
+
+h2 {
+  font-size: 6vh;
+  font-family: Degular, system-ui, sans-serif;
+  font-weight: 600;
+  line-height: 50px;
+}
+
+@media screen and (min-width: 840px) {
+  .navbar {
+    flex-direction: row;
+    align-items: center;
+  }
+  .nav-links {
+    display: block;
+    width: unset;
+    background-color: white;
+  }
+}

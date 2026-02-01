@@ -1,0 +1,239 @@
+.music::selection {
+  opacity: 0;
+}
+
+.bloc1 {
+  position: relative;
+  border: solid black 1px;
+  border-right: 0;
+  border-bottom: 0;
+  border-top-left-radius: 250px 250px;
+  height: 88vh;
+  width: 95vw;
+  background-color: white;
+  z-index: 0;
+  margin-top: 0.4vh;
+  margin-left: 5vw;
+}
+
+.scroll1 {
+  height: 62.2%;
+  width: 60%;
+  border-top: black solid 1px;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  overflow: scroll;
+}
+
+.music {
+  height: 20.7%;
+  border-bottom: solid black 1px;
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.music2 {
+  height: 12.85%;
+}
+
+.music.orange:hover {
+  background-color: #fd7e40;
+}
+.music.vert:hover {
+  background-color: #3db372;
+}
+.music.bleu:hover {
+  background-color: #4a7df2;
+}
+.music.rose:hover {
+  background-color: #f31eeb;
+}
+.music.jaune:hover {
+  background-color: #f9b125;
+}
+
+.bloc2 {
+  display: flex;
+  flex-direction: column;
+  border: solid black 1px;
+  border-right: 0;
+  border-bottom: 0;
+  border-top-left-radius: 170px 170px;
+  height: 69vh;
+  width: 48vw;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background-color: white;
+  z-index: 0;
+}
+
+.bloc2 .header {
+  margin: 4rem 0 0 4rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.bloc2 .header h2 {
+  margin: 0;
+}
+
+.bloc2 .header .osuForm {
+  width: 100%;
+  max-width: 280px;
+}
+
+.scroll2 {
+  height: 51%;
+  width: 100%;
+  border-top: black solid 1px;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  overflow: scroll;
+}
+
+input {
+  all: unset;
+  margin-top: auto;
+  margin-bottom: auto;
+  width: 174px;
+  height: 35px;
+  margin-left: 20px;
+  border-radius: 20px;
+  border: 1px black solid;
+}
+
+.osuPseudo {
+  margin: 0;
+  padding: 10px;
+  border: none;
+  height: auto;
+  width: 80%;
+  font-size: 18px;
+}
+
+button.submitButton {
+  border: none;
+  padding: 0.5em;
+  margin: 0;
+}
+
+button.submitButton:hover {
+  background-color: transparent;
+}
+
+.buttonPlaylist {
+  border: none;
+  font-size: 1.1em;
+}
+
+.buttonPlaylist.orange:hover {
+  color: #fd7e40;
+}
+.buttonPlaylist.vert:hover {
+  color: #3db372;
+}
+.buttonPlaylist.bleu:hover {
+  color: #4a7df2;
+}
+.buttonPlaylist.rose:hover {
+  color: #f31eeb;
+}
+.buttonPlaylist.jaune:hover {
+  color: #f9b125;
+}
+
+.buttonPlaylist.orange:hover svg path {
+  stroke: #fd7e40;
+}
+.buttonPlaylist.vert:hover svg path {
+  stroke: #3db372;
+}
+.buttonPlaylist.bleu:hover svg path {
+  stroke: #4a7df2;
+}
+.buttonPlaylist.rose:hover svg path {
+  stroke: #f31eeb;
+}
+.buttonPlaylist.jaune:hover svg path {
+  stroke: #f9b125;
+}
+
+.buttonPlaylist svg {
+  margin-right: 0.7vw;
+}
+.buttonPlaylist:hover {
+  border: none;
+  background-color: transparent;
+  color: black;
+}
+
+.playlistName {
+  padding: 0.4em 0.8em;
+  font-size: 1.1em;
+  border-radius: 9999px;
+}
+
+.osuForm {
+  min-width: 200px;
+  display: flex;
+  border: solid 1px black;
+  border-radius: 20px;
+}
+
+.playlistForm {
+  display: flex;
+  margin-left: 3vw;
+  margin-top: 5vh;
+  border-radius: 20px;
+}
+
+img.Avatar {
+  width: 6vw;
+  border-radius: 50%;
+  border: solid 1px black;
+}
+
+.avatarParent {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin: 0 7%;
+}
+
+.avatarParent div {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-left: 1vw;
+}
+
+.avatarParent div p {
+  font-family: Degular, system-ui, sans-serif;
+  font-size: 18px;
+  font-weight: 300;
+  line-height: 30px;
+}
+
+.avatarParent div p:first-of-type {
+  font-size: 1.9rem;
+  font-weight: 600;
+  line-height: 40px;
+}
+
+@media screen and (min-width: 840px) {
+  .navbar {
+    flex-direction: row;
+    align-items: center;
+  }
+  .nav-links {
+    display: block;
+    width: unset;
+  }
+}
