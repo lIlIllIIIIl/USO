@@ -39,8 +39,11 @@ onMounted(async () => {
   const storedState = getStoredState();
   if (state !== storedState) {
     status.value = 'error';
+    const expectedOrigin = import.meta.env.VITE_SPOTIFY_REDIRECT_URI
+      ? import.meta.env.VITE_SPOTIFY_REDIRECT_URI.replace(/\/callback\/?$/, '')
+      : window.location.origin;
     errorMessage.value = storedState == null
-      ? 'Session perdue : utilisez bien http://127.0.0.1:5173 (pas localhost), puis reconnectez-vous à Spotify.'
+      ? `Session perdue : reconnectez-vous à Spotify en partant de cette même adresse (${expectedOrigin}), puis relancez la connexion.`
       : 'État invalide (session expirée ou lien incorrect).';
     clearStoredState();
     return;
@@ -64,10 +67,13 @@ onMounted(async () => {
     router.replace('/playlist-creator');
   } catch (err) {
     status.value = 'error';
+    const apiHint = window.location.origin.includes('127.0.0.1') || window.location.origin.includes('localhost')
+      ? 'Vérifiez que l’API tourne (ex. http://127.0.0.1:8081) et que VITE_API_URL ou le proxy /api pointe vers elle.'
+      : 'Vérifiez que l’API est déployée et accessible (ex. /api sur ce domaine).';
     const msg = err.response?.data?.error
       || err.message
       || (err.code === 'ERR_NETWORK'
-        ? 'Backend injoignable : vérifiez que l’API tourne sur http://127.0.0.1:8081 et que VITE_API_URL (ou le proxy /api) pointe vers elle.'
+        ? `Backend injoignable : ${apiHint}`
         : 'Erreur lors de l’échange du code.');
     errorMessage.value = msg;
     clearStoredState();
