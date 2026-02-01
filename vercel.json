@@ -3,5 +3,9 @@
   "outputDirectory": "frontend/dist",
   "installCommand": "npm run install:all",
   "framework": null,
-  "rewrites": [{ "source": "/((?!api/).*)", "destination": "/index.html" }]
+  "rewrites": [
+    { "source": "/callback", "destination": "/index.html" },
+    { "source": "/playlist-creator", "destination": "/index.html" },
+    { "source": "/(?!api)(.*)", "destination": "/index.html" }
+  ]
 }
