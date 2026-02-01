@@ -3,7 +3,9 @@ import { fileURLToPath } from 'url';
 import path from 'path';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const dbPath = path.join(__dirname, '..', 'data', 'uso.db');
+// Sur Vercel, le filesystem est en lecture seule sauf /tmp (données éphémères)
+const dataDir = process.env.VERCEL ? '/tmp' : path.join(__dirname, '..', 'data');
+const dbPath = path.join(dataDir, 'uso.db');
 
 export function initDb() {
   const dbInstance = new Database(dbPath);
@@ -29,8 +31,8 @@ export let db;
 
 export function getDb() {
   if (!db) {
-    const dataDir = path.dirname(dbPath);
-    if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+    const dir = path.dirname(dbPath);
+    if (!process.env.VERCEL && !fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
     db = initDb();
   }
   return db;
