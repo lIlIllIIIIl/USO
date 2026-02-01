@@ -14,6 +14,6 @@
     { "source": "/callback", "destination": "/index.html" },
     { "source": "/callback/", "destination": "/index.html" },
     { "source": "/playlist-creator", "destination": "/index.html" },
-    { "source": "/:path*", "destination": "/index.html" }
+    { "source": "/", "destination": "/index.html" }
   ]
 }

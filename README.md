@@ -123,26 +123,27 @@ Le projet est prêt pour un déploiement unique (frontend + API) sur [Vercel](ht
    - Vercel utilisera le `vercel.json` et le `package.json` à la racine.
 
 3. **Variables d’environnement** (onglet _Settings → Environment Variables_)  
-   À définir pour **Production** (et éventuellement Preview) :
+   À définir pour **Production** (et éventuellement Preview).  
+   **Important** : utilise l’**URL exacte** de ton déploiement Vercel (ex. `https://uso-psi.vercel.app`), visible dans le dashboard ou l’onglet _Domains_. Cette URL doit être identique dans les variables et dans Spotify.
 
-   | Variable                    | Valeur (exemple)                        |
-   | --------------------------- | --------------------------------------- |
-   | `FRONTEND_URL`              | `https://votre-app.vercel.app`          |
-   | `VITE_SPOTIFY_CLIENT_ID`    | Client ID de votre app Spotify          |
-   | `VITE_SPOTIFY_REDIRECT_URI` | `https://votre-app.vercel.app/callback` |
-   | `OSU_CLIENT_ID`             | Client ID osu!                          |
-   | `OSU_SECRET`                | Secret osu!                             |
-   | `SPOTIFY_BASE_URL`          | `https://api.spotify.com/v1/`           |
+   | Variable                    | Valeur (exemple)                         |
+   | --------------------------- | ---------------------------------------- |
+   | `FRONTEND_URL`              | `https://ton-projet.vercel.app`          |
+   | `VITE_SPOTIFY_CLIENT_ID`    | Client ID de votre app Spotify           |
+   | `VITE_SPOTIFY_REDIRECT_URI` | `https://ton-projet.vercel.app/callback` |
+   | `OSU_CLIENT_ID`             | Client ID osu!                           |
+   | `OSU_SECRET`                | Secret osu!                              |
+   | `SPOTIFY_BASE_URL`          | `https://api.spotify.com/v1/`            |
 
    Les variables `VITE_*` sont lues au **build** : ajoutez-les dans Vercel avant le premier déploiement.
 
 4. **Spotify Dashboard**  
-   Dans l’app Spotify, onglet _Redirect URIs_, ajouter :  
-   `https://votre-app.vercel.app/callback`
+   Dans l’app Spotify, onglet _Redirect URIs_, ajouter **exactement** l’URL de callback de ton déploiement (même domaine que ci‑dessus), ex. :  
+   `https://ton-projet.vercel.app/callback`
 
 5. **Déployer**  
    Un push sur la branche connectée (souvent `main`) déclenche un déploiement.  
-   L’app est accessible à l’URL fournie par Vercel (ex. `https://uso-xxx.vercel.app`).
+   L’app est accessible à l’URL fournie par Vercel (ex. `https://uso-psi.vercel.app`).
 
 ### Comportement
 
