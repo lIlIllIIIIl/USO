@@ -2,9 +2,12 @@
   "name": "uso",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "build": "cd frontend && npm run build",
     "vercel-build": "npm run build",
-    "install:all": "cd frontend && npm install && cd ../backend && npm install"
+    "install:all": "npm install --prefix frontend && npm install --prefix backend"
   }
 }
