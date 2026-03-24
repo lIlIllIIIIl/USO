@@ -3,7 +3,12 @@ import { fileURLToPath } from 'url';
 import path from 'path';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-// Sur Vercel, le filesystem est en lecture seule sauf /tmp (données éphémères)
+/**
+ * Sur Vercel : SQLite vit dans /tmp par instance serverless. Chaque invocation peut
+ * être une autre machine → base vide ou différente → 401 « Unauthorized » aléatoires
+ * alors que le navigateur a encore `userToken` en localStorage. Il faut une base
+ * persistante (Turso, Supabase, Neon, etc.) pour un comportement fiable en prod.
+ */
 const dataDir = process.env.VERCEL ? '/tmp' : path.join(__dirname, '..', 'data');
 const dbPath = path.join(dataDir, 'uso.db');
 

@@ -422,7 +422,13 @@ async function loadAccount() {
       osuUsername: data.osuUsername ?? null,
     };
   } catch (err) {
-    const msg = err.response?.data?.error || err.message || 'Impossible de charger le compte.';
+    const status = err.response?.status;
+    const apiErr = err.response?.data?.error;
+    const looksUnauthorized =
+      status === 401 || String(apiErr || '').toLowerCase() === 'unauthorized';
+    const msg = looksUnauthorized
+      ? 'Le serveur ne retrouve pas votre session (erreur « Unauthorized »). Sur Vercel, la base SQLite est dans /tmp et change selon l’instance : le comportement peut être aléatoire. Reconnectez-vous à Spotify, ou migrez vers une base de données persistante (Turso, Supabase, Neon…).'
+      : apiErr || err.message || 'Impossible de charger le compte.';
     loadError.value = msg;
     account.value = {
       spotifyConnected: false,

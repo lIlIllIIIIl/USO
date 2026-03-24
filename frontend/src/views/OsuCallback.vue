@@ -55,10 +55,13 @@ onMounted(async () => {
     router.replace({ name: 'account' });
   } catch (err) {
     status.value = 'error';
-    errorMessage.value =
-      err.response?.data?.error ||
-      err.message ||
-      'Erreur lors de la liaison du compte osu!.';
+    const statusCode = err.response?.status;
+    const apiErr = err.response?.data?.error;
+    const looksUnauthorized =
+      statusCode === 401 || String(apiErr || '').toLowerCase() === 'unauthorized';
+    errorMessage.value = looksUnauthorized
+      ? 'Session non reconnue par le serveur (Unauthorized). Souvent dû au déploiement Vercel sans base persistante : réessayez, ou reconnectez-vous à Spotify puis liez osu! à nouveau. Pour corriger durablement, utilisez une base de données hébergée.'
+      : apiErr || err.message || 'Erreur lors de la liaison du compte osu!.';
   }
 });
 </script>
