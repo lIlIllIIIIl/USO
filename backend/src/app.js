@@ -2,7 +2,14 @@ import express from 'express';
 import cors from 'cors';
 import { getDb } from './db.js';
 import { registerSession } from './routes/auth.js';
-import { pseudo, createPlaylistRoute } from './routes/api.js';
+import {
+  accountStatus,
+  linkOsu,
+  spotifyUserPlaylists,
+  spotifyPlaylistEditor,
+  osuMostPlayedBeatmaps,
+} from './routes/account.js';
+import { pseudo, createPlaylistRoute, updatePlaylistRoute } from './routes/api.js';
 
 getDb();
 
@@ -25,8 +32,15 @@ app.use(
 app.use(express.json());
 
 app.post('/register-session', registerSession);
+app.post('/account-status', accountStatus);
+app.post('/account/spotify-playlists', spotifyUserPlaylists);
+app.post('/account/spotify-recent-playlists', spotifyUserPlaylists);
+app.post('/account/spotify-playlist-editor', spotifyPlaylistEditor);
+app.post('/account/osu-most-played', osuMostPlayedBeatmaps);
+app.post('/link-osu', linkOsu);
 app.post('/pseudo', pseudo);
 app.post('/createPlaylist', createPlaylistRoute);
+app.post('/updatePlaylist', updatePlaylistRoute);
 app.get('/error', (req, res) => res.json('error.'));
 
 export default app;

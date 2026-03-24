@@ -6,7 +6,8 @@
 const SPOTIFY_AUTH_URL = 'https://accounts.spotify.com/authorize';
 const SPOTIFY_TOKEN_URL = 'https://accounts.spotify.com/api/token';
 
-const SCOPE = 'user-read-private playlist-modify-private playlist-modify-public';
+const SCOPE =
+  'user-read-private playlist-read-private playlist-read-collaborative playlist-modify-private playlist-modify-public';
 const CODE_VERIFIER_KEY = 'spotify_code_verifier';
 const STATE_KEY = 'spotify_state';
 

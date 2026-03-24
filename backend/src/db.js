@@ -22,6 +22,21 @@ export function initDb() {
   } catch (_) {
     /* column may already exist on existing DBs */
   }
+  try {
+    dbInstance.exec('ALTER TABLE user ADD COLUMN osu_access_token TEXT');
+  } catch (_) {
+    /* may already exist */
+  }
+  try {
+    dbInstance.exec('ALTER TABLE user ADD COLUMN osu_refresh_token TEXT');
+  } catch (_) {
+    /* may already exist */
+  }
+  try {
+    dbInstance.exec('ALTER TABLE user ADD COLUMN osu_username TEXT');
+  } catch (_) {
+    /* may already exist */
+  }
   return dbInstance;
 }
 

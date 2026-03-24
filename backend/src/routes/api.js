@@ -1,6 +1,6 @@
 import { getDb } from '../db.js';
 import { getOsuToken } from '../services/osuService.js';
-import { getOsuMusic, createPlaylist } from '../services/spotifyService.js';
+import { getOsuMusic, createPlaylist, updateSpotifyPlaylist } from '../services/spotifyService.js';
 
 function getUserByToken(token) {
   if (!token) return null;
@@ -47,5 +47,25 @@ export async function createPlaylistRoute(req, res) {
   } catch (err) {
     console.error('Create playlist error:', err.response?.data || err.message);
     res.status(500).json({ error: 'Problème lors de la création de la Playlist' });
+  }
+}
+
+export async function updatePlaylistRoute(req, res) {
+  const data = req.body || {};
+  const token = data.token;
+  const user = getUserByToken(token);
+  if (!user) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  if (!data.spotifyPlaylistId) {
+    return res.status(400).json({ error: 'Missing spotifyPlaylistId' });
+  }
+
+  try {
+    const result = await updateSpotifyPlaylist(user.token_spotify, data);
+    res.json(result);
+  } catch (err) {
+    console.error('Update playlist error:', err.response?.data || err.message);
+    res.status(500).json({ error: 'Problème lors de la mise à jour de la playlist' });
   }
 }

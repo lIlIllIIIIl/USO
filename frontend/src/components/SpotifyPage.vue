@@ -1,7 +1,7 @@
 <template>
   <div class="bloc1">
     <div class="header">
-      <h1 class="playlistTitle">Nouvelle playlist</h1>
+      <h1 class="playlistTitle">{{ spotifyPlaylistId ? 'Modifier la playlist' : 'Nouvelle playlist' }}</h1>
     </div>
     <form class="playlistForm" @submit.prevent="handleSubmit">
       <input
@@ -15,7 +15,13 @@
         type="submit"
         :class="['buttonPlaylist', alternateColor, { 'is-disabled': playlistItems.length === 0 }]"
         :disabled="playlistItems.length === 0"
-        :title="playlistItems.length === 0 ? 'Ajoutez au moins un titre depuis « Musiques Osu »' : ''"
+        :title="
+          playlistItems.length === 0
+            ? 'Ajoutez au moins un titre depuis « Musiques Osu »'
+            : spotifyPlaylistId
+              ? 'Enregistrer les modifications sur Spotify'
+              : ''
+        "
         @mouseenter="onEnter"
         @mouseleave="onLeave"
       >
@@ -24,7 +30,7 @@
           <path d="M9.66797 14C9.66797 10.134 12.802 7 16.668 7" stroke="black" stroke-width="0.8"/>
           <path d="M16.6667 7L0 7" stroke="black" stroke-width="0.8"/>
         </svg>
-        Valider
+        {{ spotifyPlaylistId ? 'Enregistrer' : 'Valider' }}
       </button>
     </form>
     <div class="scroll1">
@@ -44,12 +50,14 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import { sendPlaylist } from '../api';
+import { ref, computed, watch } from 'vue';
+import { sendPlaylist, updatePlaylistRequest } from '../api';
 import { notify } from '../utils/notify';
 
 const props = defineProps({
   useValue: { type: Object, default: () => ({ idTab: [] }) },
+  spotifyPlaylistId: { type: String, default: null },
+  initialPlaylistName: { type: String, default: '' },
 });
 const emit = defineEmits(['remove']);
 
@@ -68,6 +76,18 @@ const playlistItems = computed(() => {
   if (!idTab || !Array.isArray(idTab)) return [];
   return idTab.filter((t) => t && typeof t === 'object' && t.title);
 });
+
+watch(
+  () => [props.spotifyPlaylistId, props.initialPlaylistName],
+  ([id, initial]) => {
+    if (id && typeof initial === 'string') {
+      name.value = initial;
+    } else if (!id) {
+      name.value = '';
+    }
+  },
+  { immediate: true },
+);
 
 function setColor(ok, id) {
   if (ok && hovered.value) {
@@ -123,11 +143,21 @@ async function handleSubmit() {
   const token = localStorage.getItem('userToken') || '';
   const music = props.useValue || {};
   try {
-    await sendPlaylist({ name: name.value, music, token });
-    notify('Playlist créée avec succès !');
+    if (props.spotifyPlaylistId) {
+      await updatePlaylistRequest({
+        token,
+        spotifyPlaylistId: props.spotifyPlaylistId,
+        name: name.value,
+        music,
+      });
+      notify('Playlist mise à jour sur Spotify !');
+    } else {
+      await sendPlaylist({ name: name.value, music, token });
+      notify('Playlist créée avec succès !');
+    }
   } catch (err) {
     notify(
-      err.response?.data?.error || err.message || 'Problème lors de la création de la Playlist',
+      err.response?.data?.error || err.message || 'Problème lors de l’enregistrement de la playlist',
       'error'
     );
   }
