@@ -1,9 +1,10 @@
 import axios from 'axios';
 
 /**
- * En local, laisser `VITE_API_URL` vide pour utiliser le proxy Vite (`/api` → http://127.0.0.1:8081).
- * Si vous pointez vers `http://127.0.0.1:8081`, redémarrez le backend après un `git pull` pour charger
- * les nouvelles routes (`/account-status`, `/link-osu`).
+ * En local : laisser `VITE_API_URL` vide → proxy Vite `/api` → backend.
+ * Ou `http://127.0.0.1:8081` pour appeler Express directement (sans préfixe `/api` dans l’URL).
+ * Sur Vercel : laisser vide pour `/api` en même origine. Ne pas mettre seulement
+ * `https://votre-app.vercel.app` sans `/api` (sinon 404 sur `/account-status`, etc.).
  */
 const baseURL = import.meta.env.VITE_API_URL
   ? import.meta.env.VITE_API_URL.replace(/\/?$/, '')
