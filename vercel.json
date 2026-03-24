@@ -13,7 +13,11 @@
     },
     { "source": "/callback", "destination": "/index.html" },
     { "source": "/callback/", "destination": "/index.html" },
+    { "source": "/callback-osu", "destination": "/index.html" },
+    { "source": "/callback-osu/", "destination": "/index.html" },
     { "source": "/playlist-creator", "destination": "/index.html" },
+    { "source": "/account", "destination": "/index.html" },
+    { "source": "/account/", "destination": "/index.html" },
     { "source": "/", "destination": "/index.html" }
   ]
 }
