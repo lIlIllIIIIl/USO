@@ -1,12 +1,6 @@
-import { getDb } from '../db.js';
+import { findUserByToken } from '../db.js';
 import { getOsuToken } from '../services/osuService.js';
 import { getOsuMusic, createPlaylist, updateSpotifyPlaylist } from '../services/spotifyService.js';
-
-function getUserByToken(token) {
-  if (!token) return null;
-  const database = getDb();
-  return database.prepare('SELECT * FROM user WHERE token_user = ?').get(token);
-}
 
 export async function pseudo(req, res) {
   const { pseudo, token, limit, offset } = req.body || {};
@@ -14,7 +8,7 @@ export async function pseudo(req, res) {
     return res.status(400).json({ error: 'Missing pseudo parameter.' });
   }
 
-  const user = getUserByToken(token);
+  const user = await findUserByToken(token);
   if (!user) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
@@ -36,7 +30,7 @@ export async function pseudo(req, res) {
 export async function createPlaylistRoute(req, res) {
   const data = req.body || {};
   const token = data.token;
-  const user = getUserByToken(token);
+  const user = await findUserByToken(token);
   if (!user) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
@@ -53,7 +47,7 @@ export async function createPlaylistRoute(req, res) {
 export async function updatePlaylistRoute(req, res) {
   const data = req.body || {};
   const token = data.token;
-  const user = getUserByToken(token);
+  const user = await findUserByToken(token);
   if (!user) {
     return res.status(401).json({ error: 'Unauthorized' });
   }

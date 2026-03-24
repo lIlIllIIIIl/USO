@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import { getDb } from './db.js';
+import { initDb } from './db.js';
 import { registerSession } from './routes/auth.js';
 import {
   accountStatus,
@@ -11,7 +11,7 @@ import {
 } from './routes/account.js';
 import { pseudo, createPlaylistRoute, updatePlaylistRoute } from './routes/api.js';
 
-getDb();
+await initDb();
 
 const app = express();
 const allowedOrigins = [

@@ -1,16 +1,10 @@
 import axios from 'axios';
-import { getDb } from '../db.js';
+import { findUserByToken, updateUserOsu } from '../db.js';
 import { getPlaylistForEditor } from '../services/spotifyService.js';
 
 const OSU_TOKEN_URL = process.env.OSU_BASE_URL || 'https://osu.ppy.sh/oauth/token';
 const OSU_CLIENT_ID = process.env.OSU_CLIENT_ID;
 const OSU_SECRET = process.env.OSU_SECRET;
-
-function getUserByToken(token) {
-  if (!token) return null;
-  const database = getDb();
-  return database.prepare('SELECT * FROM user WHERE token_user = ?').get(token);
-}
 
 /**
  * Body: { token }
@@ -21,7 +15,7 @@ export async function accountStatus(req, res) {
   if (!token) {
     return res.status(400).json({ error: 'Missing token' });
   }
-  const user = getUserByToken(token);
+  const user = await findUserByToken(token);
   if (!user) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
@@ -56,7 +50,7 @@ export async function linkOsu(req, res) {
     return res.status(503).json({ error: 'Osu OAuth is not configured on the server (OSU_CLIENT_ID / OSU_SECRET).' });
   }
 
-  const user = getUserByToken(token);
+  const user = await findUserByToken(token);
   if (!user) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
@@ -88,12 +82,7 @@ export async function linkOsu(req, res) {
     });
     const username = meRes.data?.username || null;
 
-    const database = getDb();
-    database
-      .prepare(
-        'UPDATE user SET osu_access_token = ?, osu_refresh_token = ?, osu_username = ? WHERE token_user = ?'
-      )
-      .run(accessToken, refreshToken, username, token);
+    await updateUserOsu(token, accessToken, refreshToken, username);
 
     res.json({ ok: true, osuUsername: username });
   } catch (err) {
@@ -194,7 +183,7 @@ export async function spotifyUserPlaylists(req, res) {
   if (!token) {
     return res.status(400).json({ error: 'Missing token' });
   }
-  const user = getUserByToken(token);
+  const user = await findUserByToken(token);
   if (!user) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
@@ -255,7 +244,7 @@ export async function spotifyPlaylistEditor(req, res) {
     return res.status(400).json({ error: 'Missing playlistId' });
   }
 
-  const user = getUserByToken(token);
+  const user = await findUserByToken(token);
   if (!user) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
@@ -291,7 +280,7 @@ export async function osuMostPlayedBeatmaps(req, res) {
   if (!token) {
     return res.status(400).json({ error: 'Missing token' });
   }
-  const user = getUserByToken(token);
+  const user = await findUserByToken(token);
   if (!user) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
