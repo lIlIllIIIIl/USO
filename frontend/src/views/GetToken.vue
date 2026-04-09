@@ -12,6 +12,6 @@ onMounted(() => {
   const params = new URLSearchParams(window.location.search);
   const token = params.get('token');
   localStorage.setItem('userToken', token || 'error');
-  router.replace('/playlist-creator');
+  router.replace('/account');
 });
 </script>

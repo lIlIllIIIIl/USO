@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { insertUserSession } from '../db.js';
+import { insertUserSession, deleteUserByToken } from '../db.js';
 
 /**
  * Enregistre une session utilisateur après OAuth PKCE (frontend).
@@ -16,4 +16,22 @@ export async function registerSession(req, res) {
   await insertUserSession(accessToken, tokenUser, refreshToken || null);
 
   res.json({ token: tokenUser });
+}
+
+/**
+ * Déconnexion : supprime la ligne utilisateur (jetons Spotify + osu! côté API).
+ * Body: { token }
+ */
+export async function logoutSession(req, res) {
+  const token = req.body?.token || req.headers.authorization?.replace(/^Bearer\s+/i, '');
+  if (!token) {
+    return res.status(400).json({ error: 'Missing token' });
+  }
+  try {
+    await deleteUserByToken(token);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('logoutSession:', err.message);
+    res.status(500).json({ error: 'Impossible de terminer la session.' });
+  }
 }

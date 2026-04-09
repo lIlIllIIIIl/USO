@@ -9,7 +9,12 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { exchangeCodeForToken, getStoredState, clearStoredState } from '../api/spotifyAuth';
+import {
+  exchangeCodeForToken,
+  getStoredState,
+  clearStoredState,
+  consumeSpotifyReturnPath,
+} from '../api/spotifyAuth';
 import axios from 'axios';
 
 const router = useRouter();
@@ -64,7 +69,7 @@ onMounted(async () => {
     });
     localStorage.setItem('userToken', data.token || '');
     status.value = 'success';
-    router.replace('/playlist-creator');
+    router.replace(consumeSpotifyReturnPath());
   } catch (err) {
     status.value = 'error';
     const apiHint = window.location.origin.includes('127.0.0.1') || window.location.origin.includes('localhost')

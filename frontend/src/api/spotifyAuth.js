@@ -10,6 +10,8 @@ const SCOPE =
   'user-read-private playlist-read-private playlist-read-collaborative playlist-modify-private playlist-modify-public';
 const CODE_VERIFIER_KEY = 'spotify_code_verifier';
 const STATE_KEY = 'spotify_state';
+/** Après le callback Spotify, `router.replace` vers ce chemin (même onglet). */
+const RETURN_PATH_KEY = 'spotify_post_login_path';
 
 function getClientId() {
   const id = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
@@ -63,15 +65,27 @@ export function generateState() {
 }
 
 /**
- * Lance l’autorisation Spotify (PKCE).
- * Stocke code_verifier et state en localStorage (persiste après redirection vers Spotify et retour).
+ * Chemin de retour après OAuth (sans hash). Accueil → /account, sinon page courante.
  */
-export async function startSpotifyLogin() {
+function defaultPostLoginPath() {
+  const path = `${window.location.pathname}${window.location.search}` || '/';
+  if (path === '/' || path === '') return '/account';
+  return path;
+}
+
+/**
+ * Lance l’autorisation Spotify (PKCE) dans le même onglet (navigation pleine page vers Spotify).
+ * @param {{ returnPath?: string }} [options] — où aller après `/callback` (défaut : page courante, / → /account)
+ */
+export async function startSpotifyLogin(options = {}) {
   const clientId = getClientId();
   const redirectUri = getRedirectUri();
   const codeVerifier = generateCodeVerifier();
   const codeChallenge = await generateCodeChallenge(codeVerifier);
   const state = generateState();
+
+  const returnPath = options.returnPath ?? defaultPostLoginPath();
+  localStorage.setItem(RETURN_PATH_KEY, returnPath);
 
   localStorage.setItem(CODE_VERIFIER_KEY, codeVerifier);
   localStorage.setItem(STATE_KEY, state);
@@ -86,7 +100,19 @@ export async function startSpotifyLogin() {
     state,
   });
 
-  window.location.href = `${SPOTIFY_AUTH_URL}?${params.toString()}`;
+  window.location.assign(`${SPOTIFY_AUTH_URL}?${params.toString()}`);
+}
+
+export function consumeSpotifyReturnPath() {
+  const path = localStorage.getItem(RETURN_PATH_KEY) || '/account';
+  localStorage.removeItem(RETURN_PATH_KEY);
+  return path;
+}
+
+/** À la déconnexion : PKCE / chemin de retour stockés côté client. */
+export function clearSpotifyClientSession() {
+  localStorage.removeItem(RETURN_PATH_KEY);
+  clearStoredState();
 }
 
 /**

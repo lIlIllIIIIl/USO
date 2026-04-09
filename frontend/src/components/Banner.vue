@@ -32,6 +32,9 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import FullScreenMenu from './FullScreenMenu.vue';
+import { logoutSession } from '../api/index';
+import { clearOsuOAuthState } from '../api/osuAuth';
+import { clearSpotifyClientSession } from '../api/spotifyAuth';
 
 const router = useRouter();
 
@@ -69,8 +72,20 @@ function goAccount() {
   router.push({ name: 'account' });
 }
 
-function onLogoutMenu() {
-  /* déconnexion à définir */
+async function onLogoutMenu() {
+  menuOpen.value = false;
+  const token = localStorage.getItem('userToken') || '';
+  if (token) {
+    try {
+      await logoutSession();
+    } catch {
+      /* session serveur déjà invalide ou réseau : on nettoie quand même le client */
+    }
+  }
+  localStorage.removeItem('userToken');
+  clearOsuOAuthState();
+  clearSpotifyClientSession();
+  router.push({ name: 'home' });
 }
 
 onMounted(() => {

@@ -21,20 +21,42 @@ export async function accountStatus(req, res) {
   }
 
   let spotifyDisplayName = null;
+  let spotifyUserId = null;
   try {
     const me = await axios.get('https://api.spotify.com/v1/me', {
       headers: { Authorization: `Bearer ${user.token_spotify}` },
     });
     spotifyDisplayName = me.data?.display_name || me.data?.id || null;
+    spotifyUserId = me.data?.id != null ? String(me.data.id) : null;
   } catch {
     /* jeton Spotify expiré ou invalide */
+  }
+
+  let osuUserId = null;
+  let osuUsername = user.osu_username || null;
+  if (user.osu_access_token) {
+    try {
+      const meOsu = await axios.get('https://osu.ppy.sh/api/v2/me', {
+        headers: { Authorization: `Bearer ${user.osu_access_token}` },
+      });
+      if (meOsu.data?.id != null) {
+        osuUserId = meOsu.data.id;
+      }
+      if (meOsu.data?.username) {
+        osuUsername = meOsu.data.username;
+      }
+    } catch {
+      /* jeton osu! expiré ou invalide */
+    }
   }
 
   res.json({
     spotifyConnected: true,
     spotifyDisplayName,
+    spotifyUserId,
     osuConnected: Boolean(user.osu_access_token),
-    osuUsername: user.osu_username || null,
+    osuUsername,
+    osuUserId,
   });
 }
 
@@ -81,10 +103,11 @@ export async function linkOsu(req, res) {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
     const username = meRes.data?.username || null;
+    const osuUserId = meRes.data?.id ?? null;
 
     await updateUserOsu(token, accessToken, refreshToken, username);
 
-    res.json({ ok: true, osuUsername: username });
+    res.json({ ok: true, osuUsername: username, osuUserId });
   } catch (err) {
     const msg =
       err.response?.data?.error_description ||
@@ -273,7 +296,7 @@ export async function spotifyPlaylistEditor(req, res) {
 
 /**
  * Beatmapsets les plus joués pour l’utilisateur osu! lié (token utilisateur OAuth).
- * Body: { token, limit? }
+ * Body: { token, limit?, offset? }
  */
 export async function osuMostPlayedBeatmaps(req, res) {
   const token = req.body?.token || req.headers.authorization?.replace(/^Bearer\s+/i, '');
@@ -289,6 +312,7 @@ export async function osuMostPlayedBeatmaps(req, res) {
   }
 
   const limit = Math.min(Math.max(Number(req.body?.limit) || 20, 1), 50);
+  const offset = Math.max(Number(req.body?.offset) || 0, 0);
 
   try {
     const meRes = await axios.get('https://osu.ppy.sh/api/v2/me', {
@@ -303,7 +327,7 @@ export async function osuMostPlayedBeatmaps(req, res) {
       `https://osu.ppy.sh/api/v2/users/${userId}/beatmapsets/most_played`,
       {
         headers: { Authorization: `Bearer ${user.osu_access_token}` },
-        params: { limit },
+        params: { limit, offset },
       },
     );
 
@@ -314,20 +338,46 @@ export async function osuMostPlayedBeatmaps(req, res) {
     if (!Array.isArray(raw)) {
       raw = [];
     }
+
+    /** most_played → BeatmapPlaycount : beatmap.total_length prioritaire. */
+    const totalLengthSeconds = (item) => {
+      const bm = item.beatmap;
+      if (bm?.total_length != null && Number.isFinite(Number(bm.total_length))) {
+        return Math.max(0, Math.floor(Number(bm.total_length)));
+      }
+      const set = item.beatmapset || {};
+      if (set.total_length != null && Number.isFinite(Number(set.total_length))) {
+        return Math.max(0, Math.floor(Number(set.total_length)));
+      }
+      const maps = set.beatmaps;
+      if (Array.isArray(maps) && maps.length) {
+        const lens = maps
+          .map((m) => m?.total_length)
+          .filter((n) => n != null && Number.isFinite(Number(n)))
+          .map((n) => Math.floor(Number(n)));
+        if (lens.length) return Math.max(...lens);
+      }
+      return null;
+    };
+
     const beatmaps = raw.map((item) => {
       const set = item.beatmapset || {};
       const covers = set.covers || {};
+      const beatmapId = item.beatmap_id ?? item.beatmap?.id ?? null;
       return {
+        beatmapId,
         beatmapsetId: set.id,
         title: set.title || '',
         artist: set.artist || '',
-        playcount: item.count ?? 0,
+        totalLengthSeconds: totalLengthSeconds(item),
         coverUrl: covers.list2x || covers.list || covers.cover || null,
         osuUrl: set.id ? `https://osu.ppy.sh/beatmapsets/${set.id}` : null,
       };
     });
 
-    res.json({ beatmaps });
+    const hasMore = beatmaps.length === limit;
+
+    res.json({ beatmaps, hasMore });
   } catch (err) {
     const status = err.response?.status;
     if (status === 401) {

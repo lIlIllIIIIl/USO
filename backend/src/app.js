@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import { initDb } from './db.js';
-import { registerSession } from './routes/auth.js';
+import { registerSession, logoutSession } from './routes/auth.js';
 import {
   accountStatus,
   linkOsu,
@@ -32,6 +32,7 @@ app.use(
 app.use(express.json());
 
 app.post('/register-session', registerSession);
+app.post('/logout', logoutSession);
 app.post('/account-status', accountStatus);
 app.post('/account/spotify-playlists', spotifyUserPlaylists);
 app.post('/account/spotify-recent-playlists', spotifyUserPlaylists);

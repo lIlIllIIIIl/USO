@@ -159,3 +159,18 @@ export async function updateUserOsu(tokenUser, osuAccessToken, osuRefreshToken, 
     )
     .run(osuAccessToken, osuRefreshToken ?? null, osuUsername ?? null, tokenUser);
 }
+
+/** Supprime la session USO (déconnexion Spotify + osu! côté serveur). */
+export async function deleteUserByToken(token) {
+  if (!token) return 0;
+  const sql = 'DELETE FROM user WHERE token_user = ?';
+
+  if (useD1()) {
+    await d1Query(sql, [token]);
+    return 1;
+  }
+
+  const db = await getSqliteDb();
+  const r = db.prepare(sql).run(token);
+  return r.changes ?? 0;
+}

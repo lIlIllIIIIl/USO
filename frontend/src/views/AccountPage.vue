@@ -21,7 +21,18 @@
             <p v-if="loading" class="account-panel__muted">Chargement…</p>
             <template v-else-if="loadError">
               <p class="account-panel__error">{{ loadError }}</p>
-              <button type="button" class="account-retry" @click="loadAccount">Réessayer</button>
+              <div class="account-panel__actions">
+                <button type="button" class="account-retry" @click="loadAccount">Réessayer</button>
+                <button
+                  type="button"
+                  :class="['account-connect', 'account-connect--compact', spotifyColor]"
+                  @click="connectSpotify"
+                  @mouseenter="spotifyHoverEnter"
+                  @mouseleave="spotifyHoverLeave"
+                >
+                  Reconnecter à Spotify
+                </button>
+              </div>
             </template>
             <template v-else-if="!account.spotifyConnected">
               <p class="account-panel__lead">Connectez votre compte pour voir toutes vos playlists Spotify.</p>
@@ -42,16 +53,18 @@
                 <p v-if="spotifyScopeError" class="account-panel__hint">
                   Une nouvelle autorisation Spotify est nécessaire (lecture des playlists).
                 </p>
-                <button
-                  v-if="spotifyScopeError"
-                  type="button"
-                  :class="['account-connect account-connect--compact', spotifyColor]"
-                  @click="connectSpotify"
-                  @mouseenter="spotifyHoverEnter"
-                  @mouseleave="spotifyHoverLeave"
-                >
-                  Reconnecter Spotify
-                </button>
+                <div class="account-panel__actions">
+                  <button
+                    type="button"
+                    :class="['account-connect', 'account-connect--compact', spotifyColor]"
+                    @click="connectSpotify"
+                    @mouseenter="spotifyHoverEnter"
+                    @mouseleave="spotifyHoverLeave"
+                  >
+                    Reconnecter à Spotify
+                  </button>
+                  <button type="button" class="account-retry" @click="retrySpotifyFeed">Réessayer</button>
+                </div>
               </template>
               <template v-else-if="!spotifyPlaylists.length">
                 <p class="account-panel__muted">Aucune playlist sur ce compte Spotify.</p>
@@ -122,9 +135,25 @@
                     </span>
                   </div>
                 </div>
-                <p v-if="spotifyLoadMoreError" class="account-panel__error account-panel__error--inline">
-                  {{ spotifyLoadMoreError }}
-                </p>
+                <template v-if="spotifyLoadMoreError">
+                  <p class="account-panel__error account-panel__error--inline">
+                    {{ spotifyLoadMoreError }}
+                  </p>
+                  <div class="account-panel__actions account-panel__actions--inline">
+                    <button type="button" class="account-retry" @click="retryLoadMorePlaylists">
+                      Réessayer
+                    </button>
+                    <button
+                      type="button"
+                      :class="['account-connect', 'account-connect--compact', spotifyColor]"
+                      @click="connectSpotify"
+                      @mouseenter="spotifyHoverEnter"
+                      @mouseleave="spotifyHoverLeave"
+                    >
+                      Reconnecter à Spotify
+                    </button>
+                  </div>
+                </template>
               </template>
             </template>
           </div>
@@ -139,7 +168,20 @@
           >
             <p v-if="loading" class="account-panel__muted">Chargement…</p>
             <template v-else-if="loadError">
-              <p class="account-panel__muted">Session non vérifiée — réessayez depuis la section Spotify.</p>
+              <p class="account-panel__error">{{ loadError }}</p>
+              <p class="account-panel__hint">La liaison osu! dépend d’une session Spotify valide.</p>
+              <div class="account-panel__actions">
+                <button type="button" class="account-retry" @click="loadAccount">Réessayer</button>
+                <button
+                  type="button"
+                  :class="['account-connect', 'account-connect--compact', spotifyColor]"
+                  @click="connectSpotify"
+                  @mouseenter="spotifyHoverEnter"
+                  @mouseleave="spotifyHoverLeave"
+                >
+                  Reconnecter à Spotify
+                </button>
+              </div>
             </template>
             <template v-else-if="!account.spotifyConnected">
               <p class="account-panel__lead">
@@ -162,7 +204,15 @@
               </button>
             </template>
             <template v-else>
-              <p class="account-panel__user">@{{ account.osuUsername }}</p>
+              <p class="account-panel__user">
+                <a
+                  class="account-panel__user-link"
+                  :href="osuProfileUrl"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >@{{ account.osuUsername }}</a>
+                
+              </p>
               <p v-if="osuFeedLoading" class="account-panel__muted">Chargement des beatmaps…</p>
               <template v-else-if="osuFeedError">
                 <p class="account-panel__error">{{ osuFeedError }}</p>
@@ -170,7 +220,7 @@
               <template v-else-if="!osuBeatmaps.length">
                 <p class="account-panel__muted">Aucune beatmap renvoyée par osu!.</p>
               </template>
-              <ul v-else class="account-beatlist">
+              <ul v-else ref="osuScrollRootRef" class="account-beatlist">
                 <li v-for="(b, idx) in osuBeatmaps" :key="osuBeatRowKey(b, idx)" class="account-beatrow">
                   <a
                     class="account-beatrow__link"
@@ -192,10 +242,21 @@
                       <span class="account-beatrow__artist">{{ b.artist }}</span>
                       <span class="beatrow-separator" aria-hidden="true" />
                     </div>
-                    <span class="account-beatrow__count">{{ formatPlaycount(b.playcount) }}</span>
+                    <span class="account-beatrow__duration" aria-label="Durée">{{ formatBeatmapDuration(b.totalLengthSeconds) }}</span>
                   </a>
                 </li>
+                <li
+                  v-if="osuHasMore || osuLoadMoreLoading"
+                  ref="osuLoadSentinelRef"
+                  class="account-beatlist__more"
+                  aria-hidden="true"
+                >
+                  <p v-if="osuLoadMoreLoading" class="account-beatlist__loading">Chargement des beatmaps suivantes…</p>
+                </li>
               </ul>
+              <p v-if="osuLoadMoreError" class="account-panel__error account-panel__error--inline">
+                {{ osuLoadMoreError }}
+              </p>
             </template>
           </div>
         </section>
@@ -203,8 +264,9 @@
       <footer class="account-footer">
         <img class="footer-logo" src="../assets/uso.svg" alt="USO" />
         <span>__________</span>
-        <span>
-          Projet développé par Jaël Beining, Alexandra Bernard, Antonin Borderie, Lucas Fassel, Patxi Manzano, Inès Richard & Alexis Kessab.
+        <span class="footer-text">
+          Projet développé par Jaël Beining, Alexandra Bernard, Antonin Borderie, Lucas Fassel, Patxi Manzano, Inès Richard & 
+          <a class="footer-text-link" href="https://alexis-kessab.com" target="_blank" rel="noopener noreferrer">Alexis Kessab</a>.
         </span>
       </footer>
     </div>
@@ -212,7 +274,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue';
 import Banner from '../components/Banner.vue';
 import { startSpotifyLogin } from '../api/spotifyAuth';
 import { startOsuLogin } from '../api/osuAuth';
@@ -223,14 +285,46 @@ const colorTab = ['vert', 'bleu', 'rose', 'orange', 'jaune'];
 /** Mêmes teintes que le menu / les boutons USO (fond au survol des cartes playlist). */
 const CARD_HOVER_BG_PALETTE = ['#3db372', '#4a7df2', '#f31eeb', '#fd7e40', '#f9b125'];
 const PLAYLIST_MORE_CARD_ID = '__more__';
+const OSU_BEATMAP_PAGE_SIZE = 24;
+/** Évite les faux « session expirée » (souvent résolus au deuxième essai). */
+const SPOTIFY_FETCH_MAX_ATTEMPTS = 5;
+const SPOTIFY_RETRY_DELAY_MS = 400;
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function fetchSpotifyPlaylistsWithRetry(options = {}) {
+  let lastErr;
+  for (let attempt = 1; attempt <= SPOTIFY_FETCH_MAX_ATTEMPTS; attempt++) {
+    try {
+      return await fetchSpotifyPlaylists(options);
+    } catch (err) {
+      lastErr = err;
+      if (attempt < SPOTIFY_FETCH_MAX_ATTEMPTS) {
+        await sleep(SPOTIFY_RETRY_DELAY_MS);
+      }
+    }
+  }
+  throw lastErr;
+}
 
 const loading = ref(true);
 const loadError = ref('');
 const account = ref({
   spotifyConnected: false,
   spotifyDisplayName: null,
+  spotifyUserId: null,
   osuConnected: false,
   osuUsername: null,
+  osuUserId: null,
+});
+
+const osuProfileUrl = computed(() => {
+  if (account.value.osuUserId != null) {
+    return `https://osu.ppy.sh/users/${account.value.osuUserId}`;
+  }
+  return '#';
 });
 
 const spotifyFeedLoading = ref(false);
@@ -249,6 +343,12 @@ let lastPlaylistCardHoverIdx = -1;
 const osuFeedLoading = ref(false);
 const osuFeedError = ref('');
 const osuBeatmaps = ref([]);
+const osuHasMore = ref(false);
+const osuLoadMoreLoading = ref(false);
+const osuLoadMoreError = ref('');
+const osuScrollRootRef = ref(null);
+const osuLoadSentinelRef = ref(null);
+let osuScrollObserver = null;
 
 const hoveredOsuBeatRowKey = ref(null);
 const hoverBgByOsuBeatRowKey = ref({});
@@ -261,10 +361,15 @@ const osuColor = ref('vert');
 const osuOld = ref(-1);
 const osuHovered = ref(false);
 
-function formatPlaycount(n) {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}k`;
-  return String(n);
+/** Durée osu! (total_length en secondes) → affichage minutes:secondes. */
+function formatBeatmapDuration(totalSeconds) {
+  if (totalSeconds == null || !Number.isFinite(Number(totalSeconds)) || Number(totalSeconds) < 0) {
+    return '—';
+  }
+  const s = Math.floor(Number(totalSeconds));
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return `${m}:${String(sec).padStart(2, '0')}`;
 }
 
 function pickColor(tab, oldRef, hovered) {
@@ -324,6 +429,9 @@ function playlistCardHoverStyle(id) {
 }
 
 function osuBeatRowKey(b, idx) {
+  if (b.beatmapId != null && b.beatmapsetId != null) {
+    return `${b.beatmapsetId}-${b.beatmapId}`;
+  }
   return b.beatmapsetId != null ? String(b.beatmapsetId) : `idx-${idx}`;
 }
 
@@ -343,6 +451,34 @@ function osuBeatRowHoverStyle(key) {
   return bg ? { backgroundColor: bg, color: '#fff' } : {};
 }
 
+function spotifyApiErrorMessage(err) {
+  const d = err.response?.data;
+  const status = err.response?.status;
+  if (err.code === 'ERR_NETWORK' || err.message === 'Network Error') {
+    return 'Impossible de joindre le serveur. Vérifiez votre connexion.';
+  }
+  if (d?.message) return d.message;
+  if (typeof d?.error === 'string') {
+    if (d.error === 'spotify_auth') return d.message || 'Session Spotify expirée — reconnectez-vous.';
+    if (d.error === 'spotify_scope') return d.message || 'Autorisations Spotify insuffisantes.';
+    if (d.error === 'Unauthorized') return 'Session USO non reconnue — reconnectez-vous à Spotify.';
+    return d.error;
+  }
+  if (status === 401) return 'Session expirée ou non autorisée — reconnectez-vous à Spotify.';
+  if (status === 403) {
+    return d?.message || 'Accès refusé par Spotify — reconnectez-vous pour mettre à jour les autorisations.';
+  }
+  return err.message || 'Erreur lors du chargement des playlists.';
+}
+
+function retrySpotifyFeed() {
+  loadSpotifyFeed();
+}
+
+function retryLoadMorePlaylists() {
+  loadAllSpotifyPlaylists();
+}
+
 async function loadSpotifyFeed() {
   hoveredPlaylistCardId.value = null;
   spotifyPlaylists.value = [];
@@ -355,13 +491,13 @@ async function loadSpotifyFeed() {
 
   spotifyFeedLoading.value = true;
   try {
-    const data = await fetchSpotifyPlaylists();
+    const data = await fetchSpotifyPlaylistsWithRetry();
     spotifyPlaylists.value = data.playlists || [];
     spotifyHasMorePlaylists.value = Boolean(data.hasMore);
     spotifyTruncatedMax.value = Boolean(data.truncatedMax);
   } catch (err) {
     const d = err.response?.data;
-    spotifyFeedError.value = d?.message || d?.error || err.message || 'Erreur Spotify.';
+    spotifyFeedError.value = spotifyApiErrorMessage(err);
     spotifyScopeError.value = d?.error === 'spotify_scope' || err.response?.status === 403;
   } finally {
     spotifyFeedLoading.value = false;
@@ -378,37 +514,100 @@ async function loadAllSpotifyPlaylists() {
   spotifyLoadMoreError.value = '';
   spotifyLoadMoreLoading.value = true;
   try {
-    const data = await fetchSpotifyPlaylists({ loadAll: true });
+    const data = await fetchSpotifyPlaylistsWithRetry({ loadAll: true });
     const more = data.playlists || [];
     spotifyPlaylists.value = [...spotifyPlaylists.value, ...more];
     spotifyHasMorePlaylists.value = false;
     if (data.truncatedMax) spotifyTruncatedMax.value = true;
   } catch (err) {
-    const d = err.response?.data;
-    spotifyLoadMoreError.value =
-      d?.message || d?.error || err.message || 'Impossible de charger le reste des playlists.';
+    spotifyLoadMoreError.value = spotifyApiErrorMessage(err);
   } finally {
     spotifyLoadMoreLoading.value = false;
   }
+}
+
+function teardownOsuScrollObserver() {
+  osuScrollObserver?.disconnect();
+  osuScrollObserver = null;
+}
+
+function setupOsuScrollObserver() {
+  teardownOsuScrollObserver();
+  const root = osuScrollRootRef.value;
+  const sentinel = osuLoadSentinelRef.value;
+  if (!root || !sentinel || !osuHasMore.value) return;
+
+  osuScrollObserver = new IntersectionObserver(
+    (entries) => {
+      if (!entries[0]?.isIntersecting) return;
+      if (!osuHasMore.value || osuLoadMoreLoading.value) return;
+      loadMoreOsuFeed();
+    },
+    { root, rootMargin: '120px 0px', threshold: 0 },
+  );
+  osuScrollObserver.observe(sentinel);
 }
 
 async function loadOsuFeed() {
   hoveredOsuBeatRowKey.value = null;
   osuBeatmaps.value = [];
   osuFeedError.value = '';
+  osuHasMore.value = false;
+  osuLoadMoreError.value = '';
+  teardownOsuScrollObserver();
   if (!account.value.spotifyConnected || !account.value.osuConnected) return;
 
   osuFeedLoading.value = true;
   try {
-    const data = await fetchOsuMostPlayed(24);
+    const data = await fetchOsuMostPlayed({
+      limit: OSU_BEATMAP_PAGE_SIZE,
+      offset: 0,
+    });
     osuBeatmaps.value = data.beatmaps || [];
+    osuHasMore.value = Boolean(data.hasMore);
   } catch (err) {
     const d = err.response?.data;
     osuFeedError.value = d?.message || d?.error || err.message || 'Erreur osu!.';
   } finally {
     osuFeedLoading.value = false;
+    await nextTick();
+    setupOsuScrollObserver();
   }
 }
+
+async function loadMoreOsuFeed() {
+  if (!osuHasMore.value || osuLoadMoreLoading.value) return;
+  if (!account.value.spotifyConnected || !account.value.osuConnected) return;
+
+  osuLoadMoreLoading.value = true;
+  osuLoadMoreError.value = '';
+  const offset = osuBeatmaps.value.length;
+  try {
+    const data = await fetchOsuMostPlayed({
+      limit: OSU_BEATMAP_PAGE_SIZE,
+      offset,
+    });
+    const more = data.beatmaps || [];
+    osuBeatmaps.value = [...osuBeatmaps.value, ...more];
+    osuHasMore.value = Boolean(data.hasMore);
+  } catch (err) {
+    const d = err.response?.data;
+    osuLoadMoreError.value = d?.message || d?.error || err.message || 'Impossible de charger plus de beatmaps.';
+  } finally {
+    osuLoadMoreLoading.value = false;
+    await nextTick();
+    setupOsuScrollObserver();
+  }
+}
+
+watch(
+  () => [osuHasMore.value, osuBeatmaps.value.length, osuLoadMoreLoading.value],
+  async () => {
+    await nextTick();
+    setupOsuScrollObserver();
+  },
+  { flush: 'post' },
+);
 
 async function loadAccount() {
   loading.value = true;
@@ -418,8 +617,10 @@ async function loadAccount() {
     account.value = {
       spotifyConnected: Boolean(data.spotifyConnected),
       spotifyDisplayName: data.spotifyDisplayName ?? null,
+      spotifyUserId: data.spotifyUserId ?? null,
       osuConnected: Boolean(data.osuConnected),
       osuUsername: data.osuUsername ?? null,
+      osuUserId: data.osuUserId ?? null,
     };
   } catch (err) {
     const status = err.response?.status;
@@ -433,8 +634,10 @@ async function loadAccount() {
     account.value = {
       spotifyConnected: false,
       spotifyDisplayName: null,
+      spotifyUserId: null,
       osuConnected: false,
       osuUsername: null,
+      osuUserId: null,
     };
   } finally {
     loading.value = false;
@@ -464,6 +667,10 @@ function connectOsu() {
 
 onMounted(() => {
   loadAccount();
+});
+
+onUnmounted(() => {
+  teardownOsuScrollObserver();
 });
 </script>
 
@@ -518,6 +725,7 @@ onMounted(() => {
   font-family: Degular, system-ui, sans-serif;
   font-size: clamp(1.2rem, 2.8vw, 1.65rem);
   font-weight: 600;
+  padding-left: 1rem;
 }
 
 .account-panel__shortcut {
@@ -546,8 +754,14 @@ onMounted(() => {
 
 .account-panel__user {
   font-size: 0.9rem;
-  font-weight: 600;
+  font-weight: 200;
   flex-shrink: 0;
+  padding-left: 1rem;
+
+  &:hover {
+    text-decoration: underline;
+    cursor: pointer;
+  }
 }
 
 .account-panel__lead,
@@ -581,6 +795,18 @@ onMounted(() => {
 .account-panel__error--inline {
   margin-top: 0.35rem;
   max-width: 100%;
+}
+
+.account-panel__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem 1rem;
+  margin-top: 0.35rem;
+}
+
+.account-panel__actions--inline {
+  margin-top: 0.25rem;
 }
 
 .account-retry {
@@ -839,6 +1065,22 @@ onMounted(() => {
   scrollbar-width: none;
 }
 
+.account-beatlist__more {
+  list-style: none;
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0.35rem 1rem 0.75rem;
+  min-height: 2rem;
+  box-sizing: border-box;
+}
+
+.account-beatlist__loading {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #555;
+  text-align: center;
+}
+
 .account-beatrow__link {
   display: flex;
   flex-direction: row;
@@ -863,7 +1105,7 @@ onMounted(() => {
 }
 
 .account-beatrow__link--hot .account-beatrow__artist,
-.account-beatrow__link--hot .account-beatrow__count {
+.account-beatrow__link--hot .account-beatrow__duration {
   color: rgba(255, 255, 255, 0.92);
 }
 
@@ -911,7 +1153,7 @@ onMounted(() => {
   color: #444;
 }
 
-.account-beatrow__count {
+.account-beatrow__duration {
   flex: 0 0 auto;
   font-size: 0.72rem;
   color: #333;
@@ -936,11 +1178,27 @@ footer.account-footer {
   display: flex;
   flex-direction: row;
   align-items: center;
+  justify-content: space-around;
   gap: 20px;
   text-align: left;
 }
 
 .footer-logo {
   max-width: 75px;
+}
+
+.footer-text {
+  max-width: 30rem;
+}
+
+.footer-text-link {
+  font-weight: 400;
+  color: #000;
+  transition: all 0.2s ease;
+
+  &:hover {
+    cursor: pointer;
+    font-weight: 200;
+  }
 }
 </style>

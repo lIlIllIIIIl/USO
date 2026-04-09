@@ -48,14 +48,27 @@ export async function updatePlaylistRequest(payload) {
   return data;
 }
 
+export async function logoutSession() {
+  const token = localStorage.getItem('userToken') || '';
+  if (!token) return;
+  const { data } = await api.post(
+    '/logout',
+    { token },
+    { headers: { Authorization: token } },
+  );
+  return data;
+}
+
 export async function fetchAccountStatus() {
   const token = localStorage.getItem('userToken') || '';
   if (!token) {
     return {
       spotifyConnected: false,
       spotifyDisplayName: null,
+      spotifyUserId: null,
       osuConnected: false,
       osuUsername: null,
+      osuUserId: null,
     };
   }
   const { data } = await api.post('/account-status', { token }, {
@@ -84,11 +97,13 @@ export async function fetchSpotifyPlaylists(options = {}) {
   return data;
 }
 
-export async function fetchOsuMostPlayed(limit = 20) {
+export async function fetchOsuMostPlayed(options = {}) {
   const token = localStorage.getItem('userToken') || '';
+  const limit = options.limit ?? 24;
+  const offset = options.offset ?? 0;
   const { data } = await api.post(
     '/account/osu-most-played',
-    { token, limit },
+    { token, limit, offset },
     { headers: { Authorization: token } },
   );
   return data;
