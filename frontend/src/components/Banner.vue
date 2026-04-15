@@ -3,7 +3,7 @@
     <router-link to="/" class="logo">
       <img src="../assets/uso.svg" alt="USO" class="logo-img" />
     </router-link>
-    <div class="nav-links">
+    <div v-if="!hideMenu" class="nav-links">
       <div class="link-background">
         <a
           href="#"
@@ -19,9 +19,10 @@
       </div>
     </div>
     <FullScreenMenu
+      v-if="!hideMenu"
       :open="menuOpen"
+      :show-logout="hasSpotifySession"
       @close="menuOpen = false"
-      @osu="onOsuMenu"
       @account="goAccount"
       @logout="onLogoutMenu"
     />
@@ -29,14 +30,30 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, computed, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import FullScreenMenu from './FullScreenMenu.vue';
 import { logoutSession } from '../api/index';
 import { clearOsuOAuthState } from '../api/osuAuth';
 import { clearSpotifyClientSession } from '../api/spotifyAuth';
 
+defineProps({
+  /** Page de connexion : logo uniquement, sans menu plein écran. */
+  hideMenu: {
+    type: Boolean,
+    default: false,
+  },
+});
+
+const route = useRoute();
 const router = useRouter();
+
+/** Session USO après OAuth Spotify : sans jeton, pas de déconnexion affichée. */
+const hasSpotifySession = computed(() => {
+  void route.fullPath;
+  const t = typeof localStorage !== 'undefined' ? localStorage.getItem('userToken') : '';
+  return Boolean(t && t.trim());
+});
 
 const colorTab = ['vert', 'bleu', 'rose', 'orange', 'jaune'];
 const color = ref('vert');
@@ -61,10 +78,6 @@ function doColor() {
 function mouseChange() {
   hovered.value = !hovered.value;
   doColor();
-}
-
-function onOsuMenu() {
-  /* comportement OSU à définir */
 }
 
 function goAccount() {

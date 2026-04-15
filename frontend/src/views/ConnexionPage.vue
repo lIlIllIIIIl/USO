@@ -1,6 +1,6 @@
 <template>
   <div class="homeContainer">
-    <Banner />
+    <Banner hide-menu />
     <div class="blocConnect">
       <div class="title">
         <h1>USO, le créateur</h1>

@@ -10,25 +10,7 @@
       >
         <div class="full-screen-menu__backdrop" @click="emit('close')" />
         <div class="full-screen-menu__content" @click.stop>
-          <button
-            type="button"
-            class="full-screen-menu__close"
-            aria-label="Fermer le menu"
-            @click="emit('close')"
-          >
-            ×
-          </button>
           <nav class="full-screen-menu__nav" aria-label="Navigation principale">
-            <button
-              type="button"
-              class="full-screen-menu__btn"
-              :style="buttonStyle('osu')"
-              @mouseenter="onBtnEnter('osu')"
-              @mouseleave="onBtnLeave"
-              @click="handleOsu"
-            >
-              OSU
-            </button>
             <button
               type="button"
               class="full-screen-menu__btn"
@@ -40,6 +22,7 @@
               Compte
             </button>
             <button
+              v-if="showLogout"
               type="button"
               class="full-screen-menu__btn"
               :style="buttonStyle('logout')"
@@ -63,12 +46,14 @@ const BG_PALETTE = ['#3db372', '#4a7df2', '#f31eeb', '#fd7e40', '#f9b125'];
 
 const props = defineProps({
   open: { type: Boolean, default: false },
+  /** Masquer sur la page de connexion ; afficher seulement avec une session USO (post-Spotify). */
+  showLogout: { type: Boolean, default: true },
 });
 
-const emit = defineEmits(['close', 'osu', 'account', 'logout']);
+const emit = defineEmits(['close', 'account', 'logout']);
 
 const hoveredKey = ref(null);
-const hoverBgByKey = ref({ osu: '', account: '', logout: '' });
+const hoverBgByKey = ref({ account: '', logout: '' });
 let lastPickedIndex = -1;
 
 function pickDistinctColor() {
@@ -94,10 +79,6 @@ function buttonStyle(key) {
   if (hoveredKey.value !== key) return {};
   const bg = hoverBgByKey.value[key];
   return bg ? { backgroundColor: bg, color: '#fff' } : {};
-}
-
-function handleOsu() {
-  emit('osu');
 }
 
 function handleAccount() {
@@ -154,29 +135,6 @@ watch(
   width: 100%;
   max-width: 28rem;
   padding: 2rem;
-}
-
-.full-screen-menu__close {
-  position: absolute;
-  top: -0.5rem;
-  right: 0.5rem;
-  width: 2.75rem;
-  height: 2.75rem;
-  border: 1px solid #000;
-  border-radius: 50%;
-  background: #fff;
-  font-size: 1.75rem;
-  line-height: 1;
-  cursor: pointer;
-  font-family: inherit;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-}
-
-.full-screen-menu__close:hover {
-  background: #f5f5f5;
 }
 
 .full-screen-menu__nav {
