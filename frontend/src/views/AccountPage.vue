@@ -265,7 +265,11 @@
         <img class="footer-logo" src="../assets/uso.svg" alt="USO" />
         <span>__________</span>
         <span class="footer-text">
-          Projet développé par Jaël Beining, Alexandra Bernard, Antonin Borderie, Lucas Fassel, Patxi Manzano, Inès Richard & 
+          Projet développé par 
+          <a class="footer-text-link" href="https://www.linkedin.com/in/jael-beining/" target="_blank" rel="noopener noreferrer">Jaël Beining</a>
+          , Alexandra Bernard, Antonin Borderie, Lucas Fassel, Patxi Manzano, 
+          <a class="footer-text-link" href="inesrichard.com" target="_blank" rel="noopener noreferrer">Inès Richard</a>
+           & 
           <a class="footer-text-link" href="https://alexis-kessab.com" target="_blank" rel="noopener noreferrer">Alexis Kessab</a>.
         </span>
       </footer>
@@ -1192,6 +1196,7 @@ footer.account-footer {
 }
 
 .footer-text-link {
+  text-decoration: underline;
   font-weight: 400;
   color: #000;
   transition: all 0.2s ease;
